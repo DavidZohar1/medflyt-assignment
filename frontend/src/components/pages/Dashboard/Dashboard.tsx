@@ -28,6 +28,7 @@ type State =
           type: "Resolved";
           report: Report;
           isRefreshing: boolean;
+          refresh: Function;
       }
     | {
           type: "Rejected";
@@ -60,12 +61,19 @@ function useDashboard(params: { year: number }) {
                     throw new Error("Error");
                 }
 
-                setState({ type: "Resolved", report: response.data, isRefreshing: false });
+                setState({ type: "Resolved", report: response.data, isRefreshing: false , refresh: refresh});
             })
             .catch(() => {
                 setState({ type: "Rejected", error: "Error" });
             });
     }, [params.year]);
+
+    const refresh = () => {
+        startLoading();
+        setTimeout(() => {
+            fetchReport()
+        }, 1000);
+    };
 
     React.useEffect(() => {
         fetchReport();
