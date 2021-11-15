@@ -28,6 +28,7 @@ type State =
           type: "Resolved";
           report: Report;
           isRefreshing: boolean;
+          refresh: Function;
       }
     | {
           type: "Rejected";
@@ -55,17 +56,24 @@ function useDashboard(params: { year: number }) {
         return axios
             .get<unknown>(endpoint(`reports/${params.year}`))
             .then((response) => {
-                if (!resType.is(response)) {
+                if (!resType.is(response.data)) {
                     console.error(PathReporter.report(resType.decode(response)).join(", "));
                     throw new Error("Error");
                 }
 
-                setState({ type: "Resolved", report: response, isRefreshing: false });
+                setState({ type: "Resolved", report: response.data, isRefreshing: false , refresh: refresh});
             })
             .catch(() => {
                 setState({ type: "Rejected", error: "Error" });
             });
     }, [params.year]);
+
+    const refresh = (() => {
+        startLoading();
+        setTimeout(() => {
+            fetchReport()
+        }, 1000);
+    });
 
     React.useEffect(() => {
         fetchReport();
