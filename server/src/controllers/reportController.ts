@@ -40,7 +40,7 @@ export const getReport = async (req: Request, res: Response) => {
                 caregiversMap.set(row.caregiver_name, [row.patient_name]);
             }
         }
-        report.caregivers = Array.from(caregiversMap, item => ({name: item[0], patients: item[1]}))
+        report.caregivers = Array.from(caregiversMap, item => ({name: item[0], patients: [item[1].join(', ')]}))
         res.status(200).json(report);
     } catch (error) {
         throw new Error(error.message);
