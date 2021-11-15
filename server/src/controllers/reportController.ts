@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { QueryResult } from 'pg';
+import {Request, Response} from 'express';
+import {QueryResult} from 'pg';
 import * as dbUtil from './../utils/dbUtil';
 
 interface Report {
@@ -23,8 +23,8 @@ export const getReport = async (req: Request, res: Response) => {
         JOIN visit ON visit.caregiver = caregiver.id
         JOIN patient ON patient.id = visit.patient
     `;
-    
-    let result : QueryResult;
+
+    let result: QueryResult;
     try {
         result = await dbUtil.sqlToDB(sql, []);
         const report: Report = {
@@ -32,12 +32,15 @@ export const getReport = async (req: Request, res: Response) => {
             caregivers: []
         };
 
-        for ( let row of result.rows) {
-            report.caregivers.push({
-                name: row.caregiver_name,
-                patients: [row.patient_name]
-            })
+        let caregiversMap = new Map();
+        for (let row of result.rows) {
+            if (caregiversMap.has(row.caregiver_name)) {
+                caregiversMap.get(row.caregiver_name).push(row.patient_name);
+            } else {
+                caregiversMap.set(row.caregiver_name, [row.patient_name]);
+            }
         }
+        report.caregivers = Array.from(caregiversMap, item => ({name: item[0], patients: item[1]}))
         res.status(200).json(report);
     } catch (error) {
         throw new Error(error.message);
