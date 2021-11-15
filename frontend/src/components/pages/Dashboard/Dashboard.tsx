@@ -68,12 +68,12 @@ function useDashboard(params: { year: number }) {
             });
     }, [params.year]);
 
-    const refresh = () => {
+    const refresh = (() => {
         startLoading();
         setTimeout(() => {
             fetchReport()
         }, 1000);
-    };
+    });
 
     React.useEffect(() => {
         fetchReport();
